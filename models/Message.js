@@ -1,0 +1,12 @@
+const mongoose = require('mongoose');
+
+const messageSchema = new mongoose.Schema({
+    messageId: { type: String, required: true, unique: true },
+    message: { type: String },
+    senderId: { type: String, required: true },
+    imageUrl: { type: String },
+    timestamp: { type: Number, default: Date.now },
+    feeling: { type: Number, default: -1 } // -1 means no reaction
+});
+
+module.exports = mongoose.model('Message', messageSchema);
