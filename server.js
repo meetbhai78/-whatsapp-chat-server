@@ -98,6 +98,32 @@ app.get('/api/users', async (req, res) => {
     }
 });
 
+// 4. Get Chat History
+app.get('/api/messages/:senderId/:receiverId', async (req, res) => {
+    try {
+        const { senderId, receiverId } = req.params;
+        const messages = await Message.find({
+            $or: [
+                { senderId: senderId, receiverId: receiverId },
+                { senderId: receiverId, receiverId: senderId }
+            ]
+        }).sort({ timestamp: 1 });
+        res.json(messages);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// 5. Delete Message
+app.delete('/api/messages/:id', async (req, res) => {
+    try {
+        await Message.findByIdAndDelete(req.params.id);
+        res.json({ message: 'Message deleted successfully' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 // --- Socket.io for Real-time Chat --- //
 io.on('connection', (socket) => {
     console.log('User connected:', socket.id);
@@ -110,15 +136,28 @@ io.on('connection', (socket) => {
 
     // Handle sending a message
     socket.on('sendMessage', async (data) => {
-        // data should contain: senderId, receiverId, message, imageUrl
-        const { senderId, receiverId, message, imageUrl } = data;
+        // data should contain: senderId, receiverId, message, timestamp
+        const { senderId, receiverId, message, timestamp } = data;
         
-        // Save to Database (In a real app, you'd save in a Chat room. Here we just broadcast)
-        // ... DB save logic ...
+        try {
+            // Save to MongoDB
+            const newMessage = new Message({
+                senderId,
+                receiverId,
+                message,
+                timestamp: timestamp || Date.now()
+            });
+            const savedMessage = await newMessage.save();
+            
+            // Add MongoDB _id to data so it can be deleted later
+            data._id = savedMessage._id;
 
-        // Emit to the receiver's room
-        io.to(receiverId).emit('receiveMessage', data);
-        console.log('Message sent to', receiverId);
+            // Emit to the receiver's room
+            io.to(receiverId).emit('receiveMessage', data);
+            console.log('Message saved and sent to', receiverId);
+        } catch (err) {
+            console.error("Error saving message:", err);
+        }
     });
 
     socket.on('disconnect', () => {
