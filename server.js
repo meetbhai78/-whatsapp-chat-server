@@ -43,9 +43,16 @@ const io = new Server(server, {
 });
 
 // Connect to MongoDB Atlas (Cloud)
-mongoose.connect('mongodb+srv://smarthospitalm_db_user:meet2007@cluster0.zwqcdzz.mongodb.net/whatsapp_clone_db?retryWrites=true&w=majority&appName=Cluster0')
-  .then(() => console.log('Connected to MongoDB Atlas (Cloud)!'))
-  .catch(err => console.error('MongoDB Atlas connection error:', err));
+mongoose.connect('mongodb+srv://smarthospitalm_db_user:meet2007@cluster0.zwqcdzz.mongodb.net/whatsapp_clone_db?retryWrites=true&w=majority&appName=Cluster0', {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+}).then(() => {
+    console.log("Connected to MongoDB Atlas (Cloud) successfully!");
+    // Drop the old messageId index that causes Duplicate Key Error
+    Message.collection.dropIndex('messageId_1').catch(err => console.log("Old index not found or already dropped"));
+}).catch(err => {
+    console.log("MongoDB Connection Error:", err);
+});
 
 
 // --- REST APIs --- //

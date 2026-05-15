@@ -1,6 +1,6 @@
 const io = require("socket.io-client");
 
-const socket = io("https://whatsapp-chat-server-k6w7.onrender.com");
+const socket = io("http://localhost:3000");
 
 socket.on("connect", () => {
     console.log("Connected with id:", socket.id);
