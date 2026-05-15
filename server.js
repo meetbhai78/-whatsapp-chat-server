@@ -43,7 +43,8 @@ const io = new Server(server, {
 });
 
 // Connect to MongoDB Atlas (Cloud)
-mongoose.connect('mongodb+srv://smarthospitalm_db_user:meet2007@cluster0.zwqcdzz.mongodb.net/whatsapp_clone_db?retryWrites=true&w=majority&appName=Cluster0', {
+const MONGO_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/whatsapp_clone_db';
+mongoose.connect(MONGO_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true
 }).then(() => {
