@@ -44,10 +44,7 @@ const io = new Server(server, {
 
 // Connect to MongoDB Atlas (Cloud)
 const MONGO_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/whatsapp_clone_db';
-mongoose.connect(MONGO_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-}).then(() => {
+mongoose.connect(MONGO_URI).then(() => {
     console.log("Connected to MongoDB Atlas (Cloud) successfully!");
     // Drop the old messageId index that causes Duplicate Key Error
     Message.collection.dropIndex('messageId_1').catch(err => console.log("Old index not found or already dropped"));
