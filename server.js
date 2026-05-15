@@ -168,6 +168,11 @@ io.on('connection', (socket) => {
         io.to(data.receiverId).emit('receiveBuzz', data);
     });
 
+    // Handle Ghost Mode Toggle
+    socket.on('toggleGhostMode', (data) => {
+        io.to(data.receiverId).emit('receiveGhostMode', data);
+    });
+
     socket.on('disconnect', () => {
         console.log('User disconnected:', socket.id);
     });
