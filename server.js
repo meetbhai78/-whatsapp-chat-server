@@ -106,7 +106,8 @@ app.get('/api/messages/:senderId/:receiverId', async (req, res) => {
             $or: [
                 { senderId: senderId, receiverId: receiverId },
                 { senderId: receiverId, receiverId: senderId }
-            ]
+            ],
+            isGhost: { $ne: true } // DO NOT send Ghost messages to the user!
         }).sort({ timestamp: 1 });
         res.json(messages);
     } catch (err) {
@@ -136,8 +137,8 @@ io.on('connection', (socket) => {
 
     // Handle sending a message
     socket.on('sendMessage', async (data) => {
-        // data should contain: senderId, receiverId, message, timestamp
-        const { senderId, receiverId, message, timestamp } = data;
+        // data should contain: senderId, receiverId, message, timestamp, isGhost
+        const { senderId, receiverId, message, timestamp, isGhost } = data;
         
         try {
             // Save to MongoDB
@@ -145,7 +146,8 @@ io.on('connection', (socket) => {
                 senderId,
                 receiverId,
                 message,
-                timestamp: timestamp || Date.now()
+                timestamp: timestamp || Date.now(),
+                isGhost: isGhost || false
             });
             const savedMessage = await newMessage.save();
             
@@ -158,6 +160,12 @@ io.on('connection', (socket) => {
         } catch (err) {
             console.error("Error saving message:", err);
         }
+    });
+
+    // Handle Buzz / Shake Phone
+    socket.on('buzz', (data) => {
+        // data should contain: senderId, receiverId
+        io.to(data.receiverId).emit('receiveBuzz', data);
     });
 
     socket.on('disconnect', () => {
