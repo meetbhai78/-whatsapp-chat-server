@@ -6,7 +6,8 @@ const messageSchema = new mongoose.Schema({
     receiverId: { type: String, required: true },
     imageUrl: { type: String },
     timestamp: { type: Number, default: Date.now },
-    feeling: { type: Number, default: -1 } // -1 means no reaction
+    feeling: { type: Number, default: -1 }, // -1 means no reaction
+    isGhost: { type: Boolean, default: false }
 });
 
 module.exports = mongoose.model('Message', messageSchema);
